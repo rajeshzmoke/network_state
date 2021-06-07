@@ -13,7 +13,7 @@ class NetworkState with ChangeNotifier {
   static NetworkState? _instance;
   static http.Client? _client;
   bool _hasConnection = false;
-  Completer<bool>? _initialNetworkTestCompleter;
+  late Completer<bool> _initialNetworkTestCompleter;
 
   static bool _isPolling = false;
   factory NetworkState() => _instance ??= new NetworkState._internal();
@@ -24,15 +24,15 @@ class NetworkState with ChangeNotifier {
   }
 
   Future<bool> get isConnected async {
-    await _initialNetworkTestCompleter?.future;
+    await _initialNetworkTestCompleter.future;
     return _hasConnection;
   }
 
   setHasConnection(bool c) {
     _hasConnection = c;
 
-    if (!_initialNetworkTestCompleter!.isCompleted) {
-      _initialNetworkTestCompleter?.complete();
+    if (!_initialNetworkTestCompleter.isCompleted) {
+      _initialNetworkTestCompleter.complete();
     }
 
     notifyListeners();
@@ -109,17 +109,17 @@ class NetworkStateBuilder extends StatefulWidget {
 
 class _NetworkStateBuilderState extends State<NetworkStateBuilder> {
   bool? _hasConnection;
-  NetworkState? _ns;
+  late NetworkState _ns;
 
   @override
   void initState() {
     _ns = new NetworkState();
-    _ns!.addListener(_onNetworkStateChange);
+    _ns.addListener(_onNetworkStateChange);
     super.initState();
   }
 
   _onNetworkStateChange() async {
-    final isConnected = await _ns!.isConnected;
+    final isConnected = await _ns.isConnected;
 
     setState(() {
       _hasConnection = isConnected;
@@ -128,7 +128,7 @@ class _NetworkStateBuilderState extends State<NetworkStateBuilder> {
 
   @override
   void dispose() {
-    _ns!.removeListener(_onNetworkStateChange);
+    _ns.removeListener(_onNetworkStateChange);
     super.dispose();
   }
 
@@ -140,7 +140,7 @@ class _NetworkStateBuilderState extends State<NetworkStateBuilder> {
           ? AsyncSnapshot.nothing()
           : AsyncSnapshot.withData(
               ConnectionState.done,
-              _hasConnection ?? false,
+              _hasConnection!,
             ),
     );
   }
