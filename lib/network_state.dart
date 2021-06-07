@@ -32,7 +32,7 @@ class NetworkState with ChangeNotifier {
     _hasConnection = c;
 
     if (!_initialNetworkTestCompleter.isCompleted) {
-      _initialNetworkTestCompleter.complete();
+      _initialNetworkTestCompleter.complete(_hasConnection);
     }
 
     notifyListeners();
