@@ -12,7 +12,7 @@ class NetworkConfig {
 class NetworkState with ChangeNotifier {
   static NetworkState? _instance;
   static http.Client? _client;
-  bool? _hasConnection;
+  bool _hasConnection = false;
   Completer<bool>? _initialNetworkTestCompleter;
 
   static bool _isPolling = false;
@@ -23,7 +23,7 @@ class NetworkState with ChangeNotifier {
     _initialNetworkTestCompleter = new Completer();
   }
 
-  Future<bool?> get isConnected async {
+  Future<bool> get isConnected async {
     await _initialNetworkTestCompleter?.future;
     return _hasConnection;
   }
