@@ -1,20 +1,19 @@
 import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 
 class NetworkConfig {
-  static List<String> pingUrls;
+  static List<String>? pingUrls;
   static int pollIntervalMs = 500;
   static int timeoutMs = 500;
 }
 
 class NetworkState with ChangeNotifier {
-  static NetworkState _instance;
-  static http.Client _client;
-  bool _hasConnection;
-  Completer<bool> _initialNetworkTestCompleter;
+  static NetworkState? _instance;
+  static http.Client? _client;
+  bool? _hasConnection;
+  Completer<bool>? _initialNetworkTestCompleter;
 
   static bool _isPolling = false;
   factory NetworkState() => _instance ??= new NetworkState._internal();
@@ -24,16 +23,16 @@ class NetworkState with ChangeNotifier {
     _initialNetworkTestCompleter = new Completer();
   }
 
-  Future<bool> get isConnected async {
-    await _initialNetworkTestCompleter.future;
+  Future<bool?> get isConnected async {
+    await _initialNetworkTestCompleter?.future;
     return _hasConnection;
   }
 
   setHasConnection(bool c) {
     _hasConnection = c;
 
-    if (!_initialNetworkTestCompleter.isCompleted) {
-      _initialNetworkTestCompleter.complete();
+    if (!_initialNetworkTestCompleter!.isCompleted) {
+      _initialNetworkTestCompleter?.complete();
     }
 
     notifyListeners();
@@ -45,7 +44,7 @@ class NetworkState with ChangeNotifier {
     }
 
     assert(NetworkConfig.pingUrls != null);
-    assert(NetworkConfig.pingUrls.length > 0);
+    assert(NetworkConfig.pingUrls!.length > 0);
 
     _isPolling = true;
 
@@ -64,7 +63,7 @@ class NetworkState with ChangeNotifier {
 
   static stopPolling() {
     _isPolling = false;
-    _client.close();
+    _client?.close();
     _client = new http.Client();
   }
 
@@ -75,8 +74,8 @@ class NetworkState with ChangeNotifier {
     try {
       result = await Future.any([
         Future.wait(
-          NetworkConfig.pingUrls.map(
-            (url) => _client.head(Uri.parse(url)),
+          NetworkConfig.pingUrls!.map(
+            (url) => _client!.head(Uri.parse(url)),
           ),
         ),
         Future.delayed(Duration(milliseconds: NetworkConfig.timeoutMs)),
@@ -86,7 +85,7 @@ class NetworkState with ChangeNotifier {
           result.every((res) => res.statusCode == 200)) {
         _ns.setHasConnection(true);
       } else {
-        _client.close();
+        _client!.close();
         _client = new http.Client();
         _ns.setHasConnection(false);
       }
@@ -100,7 +99,7 @@ typedef NetworkStateChildBuilder = Widget Function(
 );
 
 class NetworkStateBuilder extends StatefulWidget {
-  final NetworkStateChildBuilder builder;
+  final NetworkStateChildBuilder? builder;
 
   NetworkStateBuilder({@required this.builder});
 
@@ -109,18 +108,18 @@ class NetworkStateBuilder extends StatefulWidget {
 }
 
 class _NetworkStateBuilderState extends State<NetworkStateBuilder> {
-  bool _hasConnection;
-  NetworkState _ns;
+  bool? _hasConnection;
+  NetworkState? _ns;
 
   @override
   void initState() {
     _ns = new NetworkState();
-    _ns.addListener(_onNetworkStateChange);
+    _ns!.addListener(_onNetworkStateChange);
     super.initState();
   }
 
   _onNetworkStateChange() async {
-    final isConnected = await _ns.isConnected;
+    final isConnected = await _ns!.isConnected;
 
     setState(() {
       _hasConnection = isConnected;
@@ -129,19 +128,19 @@ class _NetworkStateBuilderState extends State<NetworkStateBuilder> {
 
   @override
   void dispose() {
-    _ns.removeListener(_onNetworkStateChange);
+    _ns!.removeListener(_onNetworkStateChange);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.builder(
+    return widget.builder!(
       context,
       _hasConnection == null
           ? AsyncSnapshot.nothing()
           : AsyncSnapshot.withData(
               ConnectionState.done,
-              _hasConnection,
+              _hasConnection ?? false,
             ),
     );
   }
