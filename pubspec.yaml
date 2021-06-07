@@ -5,7 +5,6 @@ author: Andrei Lesnitsky <andrei.lesnitsky@gmail.com>
 homepage: https://github.com/lesnitsky/network_state
 
 environment:
-  # sdk: ">=2.2.2 <3.0.0"
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
