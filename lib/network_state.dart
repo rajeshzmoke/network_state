@@ -11,7 +11,7 @@ class NetworkConfig {
 
 class NetworkState with ChangeNotifier {
   static NetworkState? _instance;
-  static http.Client? _client;
+  static late http.Client _client;
   bool _hasConnection = false;
   late Completer<bool> _initialNetworkTestCompleter;
 
@@ -63,7 +63,7 @@ class NetworkState with ChangeNotifier {
 
   static stopPolling() {
     _isPolling = false;
-    _client?.close();
+    _client.close();
     _client = new http.Client();
   }
 
@@ -75,7 +75,7 @@ class NetworkState with ChangeNotifier {
       result = await Future.any([
         Future.wait(
           NetworkConfig.pingUrls!.map(
-            (url) => _client!.head(Uri.parse(url)),
+            (url) => _client.head(Uri.parse(url)),
           ),
         ),
         Future.delayed(Duration(milliseconds: NetworkConfig.timeoutMs)),
@@ -85,7 +85,7 @@ class NetworkState with ChangeNotifier {
           result.every((res) => res.statusCode == 200)) {
         _ns.setHasConnection(true);
       } else {
-        _client!.close();
+        _client.close();
         _client = new http.Client();
         _ns.setHasConnection(false);
       }
